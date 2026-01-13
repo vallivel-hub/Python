@@ -1,0 +1,18 @@
+# Ignore Airflow logs and compiled files
+logs/
+__pycache__/
+.dags/__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Ignore virtualenv if someone mistakenly puts it here
+.venv/
+
+# Ignore local env and secret files
+.env
+.env.*
+secrets.env
+
+# Ignore Docker build caches (optional)
+.dockerignore

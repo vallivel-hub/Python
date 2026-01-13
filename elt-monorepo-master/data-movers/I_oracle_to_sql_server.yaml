@@ -1,0 +1,232 @@
+#
+# This yaml file contains sql used to get information needed for 02_dbt_pscs_loader.py to execute.
+# NO confidential information should go in this file and this needs to be in git as part of the package.
+# NOTE order by column_id is to keep the column order to match source oracle tables and keeps order for hashing and
+# unique keys.
+#
+#
+# This SQL pulls data from the source database and table, ingestiondatatime added to show freshness.
+source:
+  sql: |
+    SELECT
+        sysdate as IngestionDateTime
+       ,EMPLID
+       ,LAST_NAME
+       ,FIRST_NAME
+       ,MIDDLE_NAME
+       ,NAME
+       ,UM_PREVIOUS_NAME
+       ,ADDRESS1
+       ,ADDRESS2
+       ,ADDRESS3
+       ,ADDRESS4
+       ,CITY
+       ,STATE
+       ,POSTAL
+       ,COUNTY
+       ,COUNTRY
+       ,EMAIL_ADDR
+       ,PHONE
+       ,SEX
+       ,BIRTHDATE
+       ,BIRTHPLACE
+       ,BIRTHSTATE
+       ,BIRTH_COUNTY
+       ,UM_NID_USA
+       ,UM_NID_CAN
+       ,ETHNIC_GRP_CD
+       ,ETHNIC_CATEGORY
+       ,UM_ETHNIC_DESCR
+       ,MAR_STATUS
+       ,MAR_STATUS_DT
+       ,DT_OF_DEATH
+       ,UM_COUNTRY_USA
+       ,CITIZENSHIP_STATUS
+       ,UM_COUNTRY_OTH
+       ,UM_CITIZEN_STAT_OT
+       ,EFFECTIVE_TERM
+       ,RESIDENCY
+       ,RESIDENCY_DT
+       ,ADMISSION_RES
+       ,ADMISSION_EXCPT
+       ,ACAD_CAREER
+       ,STDNT_CAR_NBR
+       ,ADM_APPL_NBR
+       ,INSTITUTION
+       ,ADM_APPL_CTR
+       ,ADMIT_TYPE
+       ,FIN_AID_INTEREST
+       ,HOUSING_INTEREST
+       ,REGION
+       ,LAST_SCH_ATTEND
+       ,GRADUATION_DT
+       ,ACADEMIC_LEVEL
+       ,ADM_APPL_COMPLETE
+       ,ADM_APPL_DT
+       ,ADM_APPL_CMPLT_DT
+       ,ADM_APPL_METHOD
+       ,ADM_CREATION_DT
+       ,ADM_CREATION_BY
+       ,ADM_UPDATED_DT
+       ,ADM_UPDATED_BY
+       ,APPL_PROG_NBR
+       ,DATE1
+       ,EFFSEQ
+       ,ACAD_PROG
+       ,ACAD_PROG_DESCR
+       ,Um_Acad_Prog_Appl
+       ,PROG_STATUS
+       ,PROG_ACTION
+       ,ACTION_DT
+       ,PROG_REASON
+       ,UM_PROG_RSN_DESCR
+       ,ADMIT_TERM
+       ,EXP_GRAD_TERM
+       ,ACAD_PLAN
+       ,UM_ACAD_PLAN_DESCR
+       ,ACAD_PLAN_TYPE
+       ,ACAD_GROUP
+       ,UM_ACAD_GRP_DESCR
+       ,DEGREE
+       ,ACAD_SUB_PLAN
+       ,UM_ACAD_SUBPLN_DSC
+       ,ACAD_SUBPLAN_TYPE
+       ,RESPONSE_REASON
+       ,UM_RSP_REASN_DESCR
+       ,RESPONSE_DT
+       ,EXT_ORG_ID
+       ,UM_EXT_ORGID_DESCR
+       ,UM_MAX_SAT_MATH
+       ,UM_MAX_SAT_VERB
+       ,UM_FST_PROG_ACTION
+       ,UM_PROG_DT
+       ,UM_MAX_GRE_QUAN
+       ,UM_MAX_GRE_VERB
+       ,UM_LAST_SCH_DESCR
+       ,UM_LAST_SCH_TYPE
+       ,UM_MAX_SAT_WRIT
+       ,UM_MAX_ACT_MATH
+       ,UM_MAX_ACT_ENGL
+       ,UM_MAX_ACT_COMP
+       ,UM_MAX_ACT_READ
+       ,UM_MAX_TOEFL_COMPI
+       ,UM_MAX_TOEFL_COMPP
+       ,UM_MAX_TOEFL_COMPC
+       ,UM_MIN_ACAD_PROG
+       ,UM_MIN_ACAD_PLAN
+       ,UM_MIN_ACAD_SUBPLN
+       ,CAMPUS
+       ,UM_ADMT_PROG1
+       ,UM_ADMT_PROG2
+       ,UM_ADMT_PROG3
+       ,UM_ADMT_PROG4
+       ,UM_COND_PROG1
+       ,UM_COND_PROG2
+       ,UM_COND_PROG3
+       ,UM_COND_PROG4
+       ,UM_APPL_PROG1
+       ,UM_APPL_PROG2
+       ,UM_APPL_PROG3
+       ,UM_APPL_PROG4
+       ,UM_DEIN_PROG1
+       ,UM_DEIN_PROG2
+       ,UM_DEIN_PROG3
+       ,UM_DEIN_PROG4
+       ,UM_WADM_PROG1
+       ,UM_WADM_PROG2
+       ,UM_WADM_PROG3
+       ,UM_WADM_PROG4
+       ,UM_DENY_PROG1
+       ,UM_DENY_PROG2
+       ,UM_DENY_PROG3
+       ,UM_DENY_PROG4
+       ,UM_RECN_PROG1
+       ,UM_RECN_PROG2
+       ,UM_RECN_PROG3
+       ,UM_RECN_PROG4
+       ,UM_WAPP_PROG1
+       ,UM_WAPP_PROG2
+       ,UM_WAPP_PROG3
+       ,UM_WAPP_PROG4
+       ,UM_APP_DATE
+       ,UM_COMPLETE_DATE
+       ,UM_ADMIT_DATE
+       ,UM_NETCONFIRM_DATE
+       ,UM_GROSSCONFIRM_DT
+       ,UM_ENROLL_DATE
+       ,UM_DEFER_DATE
+       ,UM_DENY_DATE
+       ,UM_WADMINC_DATE
+       ,UM_WADMTOT_DATE
+       ,UM_WAPPINC_DATE
+       ,UM_WAPPTOTAL_DATE
+       ,UM_WADMADMIT_DATE
+       ,UM_NOSHOW_DATE
+       ,UM_NODECISION_DATE
+       ,UM_WAPPDEF_DATE
+       ,UM_WAPPDEF_TERM
+       ,UM_WAPPDEF_PLAN
+       ,UM_WAPPDEF_SUBPLAN
+       ,UM_WAPPDEF_PRGSTAT
+       ,UM_WAPPDEF_PROGACT
+       ,UM_WAPPDEF_PRGREAS
+       ,DATA_SOURCE
+       ,INPUT_DT
+       ,ROW_CHECK
+       ,UM_LST_PROG_ACTION
+       ,UM_WAIT_DATE
+       ,UM_DEIN_DATE
+       ,UM_MATRIC_DATE
+       ,UM_MAX_MAT_WAC
+       ,UM_MAX_MAT_WAP
+       ,UM_MAX_GMAT_ANALY
+       ,UM_MAX_GMAT_ANALYW
+       ,UM_MAX_GMAT_QUAN
+       ,UM_MAX_GMAT_VERB
+       ,ACAD_LOAD_APPR
+       ,UM_DISCONTINUE_DT
+       ,UM_EMAIL_HOM_ADDR
+       ,ETHNIC_GROUP
+       ,HISP_LATINO
+       ,UM_MULTIPLE_ETHNIC
+       ,UM_ETH_GRP_DESCR
+       ,APPL_FEE_TYPE
+       ,REQ_TERM
+       ,RECRUITER_ID
+       ,UM_NL_INDEX
+       ,UM_MAX_SAT_ERWS
+       ,UM_MAX_SAT_MSS
+       FROM sysadm.ps_um_appl_extract
+      where admit_term >= '2610'
+
+# This SQL Inserts the data from source to target database.
+#
+target:
+  truncshema: peoplesoft-cs
+  trunctable: PS_UM_APPL_EXTRACT
+  sqlInsert: |
+       insert into [peoplesoft-cs].[PS_UM_APPL_EXTRACT] (IngestionDateTime, EMPLID, LAST_NAME, FIRST_NAME, MIDDLE_NAME, NAME, UM_PREVIOUS_NAME, ADDRESS1, ADDRESS2,
+       ADDRESS3, ADDRESS4, CITY, STATE, POSTAL, COUNTY, COUNTRY, EMAIL_ADDR, PHONE, SEX, BIRTHDATE, BIRTHPLACE, BIRTHSTATE, BIRTH_COUNTRY,
+       UM_NID_USA, UM_NID_CAN, ETHNIC_GRP_CD, ETHNIC_CATEGORY, UM_ETHNIC_DESCR, MAR_STATUS, MAR_STATUS_DT, DT_OF_DEATH, UM_COUNTRY_USA,
+       CITIZENSHIP_STATUS, UM_COUNTRY_OTH, UM_CITIZEN_STAT_OT, EFFECTIVE_TERM, RESIDENCY, RESIDENCY_DT, ADMISSION_RES, ADMISSION_EXCPT,
+       ACAD_CAREER, STDNT_CAR_NBR, ADM_APPL_NBR, INSTITUTION, ADM_APPL_CTR, ADMIT_TYPE, FIN_AID_INTEREST, HOUSING_INTEREST, REGION,
+       LAST_SCH_ATTEND, GRADUATION_DT, ACADEMIC_LEVEL, ADM_APPL_COMPLETE, ADM_APPL_DT, ADM_APPL_CMPLT_DT, ADM_APPL_METHOD, ADM_CREATION_DT,
+       ADM_CREATION_BY, ADM_UPDATED_DT, ADM_UPDATED_BY, APPL_PROG_NBR, DATE1, EFFSEQ, ACAD_PROG, ACAD_PROG_DESCR, Um_Acad_Prog_Appl, PROG_STATUS,
+       PROG_ACTION, ACTION_DT, PROG_REASON, UM_PROG_RSN_DESCR, ADMIT_TERM, EXP_GRAD_TERM, ACAD_PLAN, UM_ACAD_PLAN_DESCR, ACAD_PLAN_TYPE,
+       ACAD_GROUP, UM_ACAD_GRP_DESCR, DEGREE, ACAD_SUB_PLAN, UM_ACAD_SUBPLN_DSC, ACAD_SUBPLAN_TYPE, RESPONSE_REASON, UM_RSP_REASN_DESCR,
+       RESPONSE_DT, EXT_ORG_ID, UM_EXT_ORGID_DESCR, UM_MAX_SAT_MATH, UM_MAX_SAT_VERB, UM_FST_PROG_ACTION, UM_PROG_DT, UM_MAX_GRE_QUAN,
+       UM_MAX_GRE_VERB, UM_LAST_SCH_DESCR, UM_LAST_SCH_TYPE, UM_MAX_SAT_WRIT, UM_MAX_ACT_MATH, UM_MAX_ACT_ENGL, UM_MAX_ACT_COMP, UM_MAX_ACT_READ,
+       UM_MAX_TOEFL_COMPI, UM_MAX_TOEFL_COMPP, UM_MAX_TOEFL_COMPC, UM_MIN_ACAD_PROG, UM_MIN_ACAD_PLAN, UM_MIN_ACAD_SUBPLN, CAMPUS, UM_ADMT_PROG1,
+       UM_ADMT_PROG2, UM_ADMT_PROG3, UM_ADMT_PROG4, UM_COND_PROG1, UM_COND_PROG2, UM_COND_PROG3, UM_COND_PROG4, UM_APPL_PROG1, UM_APPL_PROG2,
+       UM_APPL_PROG3, UM_APPL_PROG4, UM_DEIN_PROG1, UM_DEIN_PROG2, UM_DEIN_PROG3, UM_DEIN_PROG4, UM_WADM_PROG1, UM_WADM_PROG2, UM_WADM_PROG3,
+       UM_WADM_PROG4, UM_DENY_PROG1, UM_DENY_PROG2, UM_DENY_PROG3, UM_DENY_PROG4, UM_RECN_PROG1, UM_RECN_PROG2, UM_RECN_PROG3, UM_RECN_PROG4,
+       UM_WAPP_PROG1, UM_WAPP_PROG2, UM_WAPP_PROG3, UM_WAPP_PROG4, UM_APP_DATE, UM_COMPLETE_DATE, UM_ADMIT_DATE, UM_NETCONFIRM_DATE,
+       UM_GROSSCONFIRM_DT, UM_ENROLL_DATE, UM_DEFER_DATE, UM_DENY_DATE, UM_WADMINC_DATE, UM_WADMTOT_DATE, UM_WAPPINC_DATE, UM_WAPPTOTAL_DATE,
+       UM_WADMADMIT_DATE, UM_NOSHOW_DATE, UM_NODECISION_DATE, UM_WAPPDEF_DATE, UM_WAPPDEF_TERM, UM_WAPPDEF_PLAN, UM_WAPPDEF_SUBPLAN,
+       UM_WAPPDEF_PRGSTAT, UM_WAPPDEF_PROGACT, UM_WAPPDEF_PRGREAS, DATA_SOURCE, INPUT_DT, ROW_CHECK, UM_LST_PROG_ACTION, UM_WAIT_DATE, UM_DEIN_DATE,
+       UM_MATRIC_DATE, UM_MAX_MAT_WAC, UM_MAX_MAT_WAP, UM_MAX_GMAT_ANALY, UM_MAX_GMAT_ANALYW, UM_MAX_GMAT_QUAN, UM_MAX_GMAT_VERB, ACAD_LOAD_APPR,
+       UM_DISCONTINUE_DT, UM_EMAIL_HOM_ADDR, ETHNIC_GROUP, HISP_LATINO, UM_MULTIPLE_ETHNIC, UM_ETH_GRP_DESCR, APPL_FEE_TYPE, REQ_TERM,
+       RECRUITER_ID, UM_NL_INDEX, UM_MAX_SAT_ERWS, UM_MAX_SAT_MSS)
+                        VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,
+                               ?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,
+                               ?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)

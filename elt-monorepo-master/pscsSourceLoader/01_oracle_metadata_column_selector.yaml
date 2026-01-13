@@ -1,0 +1,36 @@
+#
+# This yaml file contains sql used to get information needed for 01_oracle_metadata_column_selector.py to execute.
+# NO confidential information should go in this file and this needs to be in git as part of the package.
+#
+#
+# This SQL gets the "list" of table names from the peoplesoft-cs schema to be processed.
+UMS_DBT:
+  sqltablelist: |
+    SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE = 'BASE TABLE' and TABLE_SCHEMA = 'peoplesoft-cs' ORDER BY TABLE_NAME
+
+# This SQL gets the table columns of the ps-cs schema table from the oracle_metadata
+# table for the peoplesoft-cs table being processed (TABLE_NAME).  The unique column flags are displayed and
+# the update-able use_columns are displayed for editing.
+#                        [MetaData].
+ELT_MetaData:
+  sqlfetchtable: |    
+    SELECT a.column_name, a.unique_key_column, a.use_column FROM [ELT_MetaData].[MetaData].[oracle_metadata] a 
+      where a.table_name = ? order by unique_key_column desc, use_column desc, column_name
+
+# This SQL gets the value of the direct_dim_table column from the ps-cs schema table from the oracle_metadata
+# table for the peoplesoft-cs table being processed (TABLE_NAME).  Used to display if a table has a direct
+# dimension view created or not.
+# This flag is only on the column_id one for a table even if there are multiple columns for a table.
+  sqlgetdim: |
+    SELECT a.direct_dim_table FROM [ELT_MetaData].[MetaData].[oracle_metadata] a where a.table_name = ? AND column_id = 1
+
+# This SQL UPDATES the use_columns to be either a 'Y' to be used in ps-cs or null (None) meaning don't use
+# from the oracle_metadata table for the peoplesoft-cs table being processed (TABLE_NAME).
+  sqlupdateusecolumn: |
+    UPDATE [ELT_MetaData].[MetaData].[oracle_metadata]  SET use_column = ? WHERE table_name = ? AND column_name = ?
+
+# This SQL UPDATES the direct_dim_table to be either a 'Y' or null (None) meaning yes make or don't make
+# a dimension view from the oracle_metadata table for the peoplesoft-cs table being processed (TABLE_NAME).
+# This flag is only on the column_id one for a table even if there are multiple columns for a table.
+  sqlupdatedimension: |
+    UPDATE [ELT_MetaData].[MetaData].[oracle_metadata] SET direct_dim_table = ? WHERE table_name = ? AND column_id = 1

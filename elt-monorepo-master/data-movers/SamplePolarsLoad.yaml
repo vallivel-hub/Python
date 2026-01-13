@@ -1,0 +1,81 @@
+#
+# This yaml file contains sql used to get information needed for SamplePolarsLoad.py to execute.
+# NO confidential information should go in this file and this needs to be in git as part of the package.
+#
+#----------------------------------------------- START Oracle Queries
+# This SQL gets the metadata from Oracle CSPRD for the table being processed.
+CSPRD:
+  sql:
+    with unique_index as (
+    select ind.index_name, ind_col.column_name
+    from sys.dba_indexes ind
+    inner join sys.dba_ind_columns ind_col on ind.owner = ind_col.index_owner and ind.index_name = ind_col.index_name
+    where ind.uniqueness = 'UNIQUE' and ind.table_name = :1
+    )
+    SELECT atc.TABLE_NAME, atc.COLUMN_NAME, atc.DATA_TYPE, atc.DATA_LENGTH, atc.DATA_PRECISION, atc.DATA_SCALE, atc.column_id,
+    case
+    when ui.column_name is not null then 'Y'
+    end as unique_key_column,
+    case
+    when ui.column_name is not null then 'Y'
+    end as use_column
+    FROM ALL_TAB_COLUMNS atc
+    left outer join unique_index ui on atc.column_name = ui.column_name and atc.table_name = ui.index_name
+    where atc.table_name = :2 order by column_id
+
+# This SQL gets the metadata from Oracle CSRPT for the table being processed.
+CSRPT:
+  sql:
+    with unique_index as (
+    select ind.index_name, ind_col.column_name
+    from sys.dba_indexes ind
+    inner join sys.dba_ind_columns ind_col on ind.owner = ind_col.index_owner and ind.index_name = ind_col.index_name
+    where ind.uniqueness = 'UNIQUE' and ind.table_name = :1
+    )
+    SELECT atc.TABLE_NAME, atc.COLUMN_NAME, atc.DATA_TYPE, atc.DATA_LENGTH, atc.DATA_PRECISION, atc.DATA_SCALE, atc.column_id,
+    case
+    when ui.column_name is not null then 'Y'
+    end as unique_key_column,
+    case
+    when ui.column_name is not null then 'Y'
+    end as use_column
+    FROM ALL_TAB_COLUMNS atc
+    left outer join unique_index ui on atc.column_name = ui.column_name and atc.table_name = ui.index_name
+    where atc.table_name = :2 order by column_id
+
+#----------------------------------------------- START SQL Server Queries
+# This SQL gets the "list" of table names from to be processed. [ELT_MetaData].[MetaData].[xxxxxx]
+# sqltablelist is the tag that gets pulled to run the list.  There are 2 versions here.  The top one just pulls
+# a single table of your choosing.
+# The bottom one goes against ELT_MetaData.MetaData.DataObject to pick tables that are active. (production version)
+# To run between the two versions make the name sqltablelist for the one you want to execute and add a 2 or what ever
+# to make the name different so it doesn't get run.
+ELT_MetaData:
+  sqltablelist2: |
+      SELECT 'PS_UM_STUD_EXTRACT' as TABLE_NAME
+
+# The first commented out line is for a quick test, the second is a sample mix of tables and the last is to show exclusion
+  sqltablelist:
+    SELECT
+    TABLE_NAME = DO.Name
+    FROM
+    ELT_MetaData.MetaData.DataObject DO
+    JOIN ELT_MetaData.MetaData.DataObjectType DOT ON (DOT.DataObjectTypeId = DO.DataObjectTypeId)
+    JOIN ELT_MetaData.MetaData.DataSource DS ON (DS.DataSourceId = DO.DataSourceId)
+    JOIN ELT_MetaData.MetaData.SystemOfEntry SOE ON (SOE.SystemOfEntryId = DS.SystemOfEntryId)
+    WHERE
+    SOE.Name IN ('peoplesoft-cs')
+    AND DOT.Name IN ('Oracle Transactional Table')
+    AND SYSDATETIME() BETWEEN DO.EffectiveStartDate AND DO.EffectiveEndDate
+    AND SYSDATETIME() BETWEEN DS.EffectiveStartDate AND DS.EffectiveEndDate
+    AND SYSDATETIME() BETWEEN SOE.EffectiveStartDate AND SOE.EffectiveEndDate
+#    AND do.name in ('PS_STATE_TBL','PS_ADDRESSES')
+    #    AND do.name in ('PS_STATE_TBL','PS_ACAD_CAR_TBL','PS_INSTITUTION_TBL','PS_RESIDENCY_OFF','PS_PERSONAL_DATA','PS_ITEM_SF')
+    #    and do.name != 'PS_ITEM_SF' # -- This is to exclude PS_ITEM_SF table
+
+UMS_DBT:
+  # This SQL gets the unique columns from the oracle_metadata table for the peoplesoft-cs table being processed (TABLE_NAME).
+  sqluniquecolumns: |
+    SELECT COLUMN_NAME FROM [ELT_MetaData].[MetaData].[oracle_metadata]
+        WHERE TABLE_NAME = ? AND unique_key_column = 'Y'
+        ORDER BY COLUMN_ID

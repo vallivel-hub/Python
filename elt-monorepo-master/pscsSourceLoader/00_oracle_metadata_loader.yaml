@@ -1,0 +1,94 @@
+#
+# This yaml file contains sql used to get information needed for 00_oracle_metadata_loader.py to execute.
+# NO confidential information should go in this file and this needs to be in git as part of the package.
+#
+#----------------------------------------------- START Oracle Queries
+# This SQL gets the metadata from Oracle for the table being processed.
+# Note while this is tagged as CSPRD, it is used for all oracle database connections.
+CSPRD:
+  sql:
+    with unique_index as (
+    select ind.index_name, ind_col.column_name
+    from sys.dba_indexes ind
+    inner join sys.dba_ind_columns ind_col on ind.owner = ind_col.index_owner and ind.index_name = ind_col.index_name
+    where ind.uniqueness = 'UNIQUE' and ind.table_name = :1
+    )
+    SELECT atc.TABLE_NAME, atc.COLUMN_NAME, atc.DATA_TYPE, atc.DATA_LENGTH, atc.DATA_PRECISION, atc.DATA_SCALE, atc.column_id,
+    case
+    when ui.column_name is not null then 'Y'
+    end as unique_key_column,
+    case
+    when ui.column_name is not null then 'Y'
+    end as use_column
+    FROM ALL_TAB_COLUMNS atc
+    left outer join unique_index ui on atc.column_name = ui.column_name and atc.table_name = ui.index_name
+    where atc.table_name = :2
+
+#----------------------------------------------- START SQL SERVER Queries
+# This SQL gets the "list" of table names from the MetaData.DataObject table that have dates and flags marking  them ready to be processed.
+#  data to be loaded into - [ELT_MetaData].[MetaData].[oracle_metadata]
+ELT_MetaData:
+  sqltablelist: |
+    SELECT
+      TABLE_NAME = DO.Name
+    FROM
+      ELT_MetaData.MetaData.DataObject DO
+      JOIN ELT_MetaData.MetaData.DataObjectType DOT ON (DOT.DataObjectTypeId = DO.DataObjectTypeId)
+      JOIN ELT_MetaData.MetaData.DataSource DS ON (DS.DataSourceId = DO.DataSourceId)
+      JOIN ELT_MetaData.MetaData.SystemOfEntry SOE ON (SOE.SystemOfEntryId = DS.SystemOfEntryId)
+    WHERE
+      SOE.Name IN ('peoplesoft-cs')
+      AND DOT.Name IN ('Oracle Transactional Table')
+      AND SYSDATETIME() BETWEEN DO.EffectiveStartDate AND DO.EffectiveEndDate
+      AND SYSDATETIME() BETWEEN DS.EffectiveStartDate AND DS.EffectiveEndDate
+      AND SYSDATETIME() BETWEEN SOE.EffectiveStartDate AND SOE.EffectiveEndDate
+# SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'peoplesoft-cs'      - old master table list.
+
+# This SQL ------------ gets the "list" of the unique key columns for a given table less effdt and effseq.
+  sqluniquecolumns: |
+    SELECT COLUMN_NAME FROM [ELT_MetaData].[MetaData].[oracle_metadata]
+        WHERE TABLE_NAME = ? AND unique_key_column = 'Y' AND COLUMN_NAME != 'EFFDT' AND COLUMN_NAME != 'EFFSEQ' 
+        ORDER BY COLUMN_ID
+
+# This SQL ------------ merges new data only into oracle_metadata table.
+  sqlInsertOracleMetadata:     MERGE INTO [ELT_MetaData].[MetaData].[oracle_metadata] AS target
+    USING (VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)) AS source (table_name, column_name, data_type, data_length, data_precision, data_scale, column_id, unique_key_column, use_column)
+    ON target.table_name = source.table_name AND target.column_name = source.column_name
+    WHEN MATCHED AND target.data_length <> source.data_length THEN
+    UPDATE SET target.data_length = source.data_length
+    WHEN NOT MATCHED THEN
+    INSERT (table_name, column_name, data_type, data_length, data_precision, data_scale, column_id, unique_key_column, use_column)
+    VALUES (source.table_name, source.column_name, source.data_type, source.data_length, data_precision, data_scale, column_id, unique_key_column, use_column);
+
+  # This SQL fills the hashkey_code column where column_id = 1 with the hashkey "SQL" code for the given table.
+  sqlupdatehashkeys: |
+    UPDATE [ELT_MetaData].[MetaData].[oracle_metadata]
+    SET hashkey_code = ?,
+        oracle_hashkey_code = ?
+    WHERE table_name = ? AND column_id = '1'
+
+# NOT USED IN SCRIPT!!! Copy and paste this to create a fresh oracle_metadata table.
+  ddl: |
+    USE [ELT_MetaData]
+    GO
+
+    SET ANSI_NULLS ON
+    GO
+
+    SET QUOTED_IDENTIFIER ON
+    GO
+
+    CREATE TABLE [MetaData].[oracle_metadata](
+    	[table_name] [nvarchar](128) NOT NULL,
+    	[column_name] [nvarchar](128) NOT NULL,
+    	[data_type] [nvarchar](50) NOT NULL,
+    	[data_length] [int] NOT NULL,
+    	[data_precision] [int] NULL,
+    	[data_scale] [int] NULL,
+    	[column_id] [int] NULL,
+    	[unique_key_column] [nvarchar](1) NULL,
+    	[use_column] [nvarchar](1) NULL,
+    	[direct_dim_table] [nvarchar](1) NULL,
+    	[hashkey_code] [varchar](max) NULL
+    ) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+    GO

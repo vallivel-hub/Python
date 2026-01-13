@@ -1,0 +1,17 @@
+stages:
+  - test
+
+variables:
+  PIP_DISABLE_PIP_VERSION_CHECK: "1"
+
+before_script:
+  - python -m venv .venv
+  - . .venv/Scripts/activate
+  - pip install --upgrade pip
+  - pip install -e shared_libs
+
+dry_run_logger_test:
+  stage: test
+  script:
+    - pip install -r pscsSourceLoader/requirements.txt
+    - python -c "from db_utils.logger import get_logger; get_logger('ci').info('CI dry run complete')"

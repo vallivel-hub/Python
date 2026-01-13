@@ -1,0 +1,67 @@
+# PROD Database Connections
+databases:
+
+  # Oracle
+
+  # CS used to allow CSRPT to be the source when running with DEV argument.
+  CS:
+    type: oracle
+    user: { DB_USER }
+    password: { DB_PASS }
+    dsn: //csprd.db.its.maine.edu:1521/csprd_srv.its.maine.edu
+
+  CSPRD:
+    type: oracle
+    user: {DB_USER}
+    password: {DB_PASS}
+    dsn: //csprd.db.its.maine.edu:1521/csprd_srv.its.maine.edu
+
+  HRPRD:
+    type: oracle
+    user: {DB_USER}
+    password: {DB_PASS}
+    dsn: //hrprd.db.its.maine.edu:1521/HRPRD_srv.its.maine.edu
+
+  TSPRD:
+    type: oracle
+    user: {DB_USER}
+    password: {DB_PASS}
+    dsn: //tsprd.db.its.maine.edu:1521/TSPRD_srv.its.maine.edu
+
+  ENT:
+    type: oracle
+    user: {DB_USER}
+    password: {DB_PASS}
+    dsn: //ENTPRD.db.its.maine.edu:1521/ENTPRD_srv.its.maine.edu
+
+  CSRPT:
+    type: oracle
+    user: {DB_USER}
+    password: {DB_PASS}
+    dsn: //csrpt.db.its.maine.edu:1521/csrpt_srv.its.maine.edu
+
+  # SQL Server
+
+  ELT_MetaData:
+    type: mssql
+    driver: ODBC Driver 17 for SQL Server
+    server: wv-o-ums-sql04.uad.maine.edu
+    database: ELT_MetaData
+    user: {DB_USER}
+    password: {DB_PASS}
+
+  UMS_DV:
+    type: mssql
+    driver: ODBC Driver 17 for SQL Server
+    server: wv-o-ums-sql04.uad.maine.edu
+    database: UMS_DV
+    user: {DB_USER}
+    password: {DB_PASS}
+
+  UMS_DBT:
+    type: mssql
+    driver: ODBC Driver 17 for SQL Server
+    server: wv-o-ums-sql04.uad.maine.edu
+    database: UMS_DBT
+    user: {DB_USER}
+    password: {DB_PASS}

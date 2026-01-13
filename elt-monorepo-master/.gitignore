@@ -1,0 +1,35 @@
+# Bytecode
+__pycache__/
+*.py[cod]
+
+# Virtual environments
+.venv/
+venv/
+
+# IDE settings
+.idea/
+.vscode/
+*.iml
+
+# Logs and output
+logs/
+*.log
+
+# OS metadata
+Thumbs.db
+.DS_Store
+
+#  auto-generated metadata created by running pip install -e shared_libs
+*.egg-info/
+shared_libs/**/*.egg-info/
+
+# Outside repo, but just in case
+/ELT/
+
+# Being extra safe to exclude for sure the sensitive directories:
+$HOME/ELT/.DSITConnections/TEST/.env
+$HOME/ELT/.DSITConnections/TEST/dataBaseConnections.yaml
+$HOME/ELT/.DSITConnections/PROD/.env
+$HOME/ELT/.DSITConnections/PROD/dataBaseConnections.yaml
+$HOME/ELT/.early_alert/.env
+$HOME/ELT/logs/

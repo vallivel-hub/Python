@@ -1,0 +1,5 @@
+-e ../shared_libs
+PyYAML
+python-dotenv
+pandas
+polars

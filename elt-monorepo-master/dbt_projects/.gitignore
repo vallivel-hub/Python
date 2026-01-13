@@ -1,0 +1,3 @@
+dbt_projects/*
+!dbt_projects/.gitkeep
+!dbt_projects/README.md

@@ -1,0 +1,6 @@
+pyyaml
+python-dotenv
+pyodbc
+oracledb
+polars
+tzdata

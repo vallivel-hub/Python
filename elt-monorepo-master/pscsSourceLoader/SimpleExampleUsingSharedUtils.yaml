@@ -1,0 +1,81 @@
+#
+# This is a sample yaml file to the simple example program to use for testing, it is based on dbt_pscs_loaser. yaml
+#
+# This yaml file contains sql used to get information needed for dbt_pscs_loader.py to execute.
+# NO confidential information should go in this file and this needs to be in git as part of the package.
+# NOTE order by column_id is to keep the column order to match source oracle tables and keeps order for hashing and
+# unique keys.
+#
+#
+# This SQL gets the "list" of table names from the peoplesoft-cs schema to be processed.  Commented out lines are for
+# limiting the load run.
+UMS_DBT:
+  sqltablelist: |
+    SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'peoplesoft-cs'
+    and TABLE_NAME = 'PS_STATE_TBL'
+#    and (TABLE_NAME = 'PS_RESIDENCY_OFF' or TABLE_NAME = 'PS_PERSONAL_DATA' or TABLE_NAME = 'PS_ACAD_CAR_TBL')
+#   and (TABLE_NAME = 'PS_RESIDENCY_OFF' or TABLE_NAME = 'PS_PERSONAL_DATA' or TABLE_NAME = 'PS_ACAD_CAR_TBL')
+#    and TABLE_NAME = 'PS_TERM_TBL'
+#    and TABLE_NAME = 'PS_ETHNIC_GRP_TBL'
+#    and (TABLE_NAME = 'PS_TERM_TBL' or TABLE_NAME = 'PS_PERSONAL_DATA')
+
+# This SQL gets the table columns to be created and loaded into the ps-cs schema table from the oracle_metadata
+# table for the peoplesoft-cs table being processed (TABLE_NAME).
+  sqlcolumns: |
+    SELECT COLUMN_NAME FROM [ELT_MetaData].[MetaData].[oracle_metadata]
+        WHERE TABLE_NAME = ? AND use_column = 'Y'
+        ORDER BY COLUMN_ID
+
+# This SQL gets the unique columns from the oracle_metadata table for the peoplesoft-cs table being processed (TABLE_NAME).
+  sqluniquecolumns: |
+    SELECT COLUMN_NAME FROM [ELT_MetaData].[MetaData].[oracle_metadata]
+        WHERE TABLE_NAME = ? AND unique_key_column = 'Y'
+        ORDER BY COLUMN_ID
+
+# This SQL converts the columns' data type to "match" Oracle data types in SQL Server from the oracle_metadata
+# table for the peoplesoft-cs table being processed (TABLE_NAME).  This is then used to create the ps-cs table equivalent
+# with Oracle "matching" columns.
+  sqltypeconversioncolumns: |
+    SELECT 
+          CASE 
+              WHEN data_type in ('CHAR','NCHAR') THEN '[' + column_name + '] NCHAR(' + CAST(data_length AS VARCHAR) + ')'
+              WHEN data_type in ('VARCHAR2') THEN '[' + column_name + '] VARCHAR(' + CAST(data_length AS VARCHAR) + ')'
+              WHEN data_type = 'NVARCHAR2' THEN '[' + column_name + '] NVARCHAR(' + CAST(data_length AS VARCHAR) + ')'
+              WHEN data_type = 'DATE' THEN '[' + column_name + '] DATETIME2(7)'
+              WHEN data_type in ('TIMESTAMP(6)','TIMESTAMP(9)') THEN '[' + column_name + '] DATETIME'
+              WHEN data_type in ('CLOB','LONG') THEN '[' + column_name + '] TEXT'
+              WHEN data_type = 'BLOB' THEN '[' + column_name + '] VARBINARY(MAX)'
+              WHEN data_type = 'LONG' THEN '[' + column_name + '] VARBINARY(MAX)'
+              WHEN data_type = 'NUMBER' and data_precision is null THEN '[' + column_name + '] INT'
+              WHEN data_type = 'NUMBER' and data_precision is not null THEN '[' + column_name + '] DECIMAL(' + CAST(data_precision AS VARCHAR) + ','+ CAST(data_scale AS VARCHAR) + ')'
+            ELSE data_type 
+          END AS COLUMN_NAME
+       FROM [ELT_MetaData].[MetaData].[oracle_metadata]
+        WHERE TABLE_NAME = ? AND use_column = 'Y'
+      ORDER BY COLUMN_ID 
+
+# This SQL gets the hashkey_code from the oracle_metadata table for the peoplesoft-cs table being processed (TABLE_NAME).
+  sqlhashcode: |
+    SELECT HASHKEY_CODE FROM [ELT_MetaData].[MetaData].[oracle_metadata]
+        WHERE TABLE_NAME = ? AND COLUMN_ID = '1'
+
+# This SQL gets the "create" dimension table flag from the oracle_metadata table for the peoplesoft-cs table
+# being processed (TABLE_NAME).  If the column is a 'Y' a dimension view will be created for the table.
+  sqldimensiontable: |
+    SELECT DIRECT_DIM_TABLE FROM [ELT_MetaData].[MetaData].[oracle_metadata]
+        WHERE TABLE_NAME = ? AND COLUMN_ID = '1'
+
+  # This SQL IS NOTE USED IN ANY PROGRAM and is currently just for manual setup for the SP.
+  # This SQL is keeping the procedure call in a YAML file with parameter placeholders for the stored procedure to perform scd2 logic on the TERM_YBL
+  # Test at the moment.  NOTE!!!! Need to USE ELT_MetaData then change back to UMS_DBT if not is stays in the cursor!!!
+  sqlscd2storedprocedurecall: |
+    USE [ELT_MetaData];
+    EXEC [TSQL].[sp_merge_scd_dim]
+      @InDB = 'UMS_DBT',
+      @InSchema = 'ps-cs',
+      @Intable_name = '{table_name}',
+      @InHashColumnList = '{hash_columns}',
+      @InColumnList = '{column_list}',
+      @InStageColumnList = '{stage_column_list}',
+      @Inhashdiff = '{hashdiff}',
+      @Inhashkey = '{hashkey}'
